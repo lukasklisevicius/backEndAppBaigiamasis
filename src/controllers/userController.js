@@ -13,7 +13,7 @@ function validateUserId(req, res, next) {
 
 router.post('/user', validateUserId, (req, res) => {
     const { userId } = req.body;
-    const credits = 5;
+    const credits = 3;
     const sql = 'INSERT INTO users (UUID, credits) VALUES (?, ?)';
     
     connectionPool.query(sql, [userId, credits], (error, results) => {
@@ -38,7 +38,7 @@ router.get('/user/:uuid', validateUserId, (req, res) => {
         }
         if (results.length === 0) {
             // User not found, so create the user
-            const credits = 5;
+            const credits = 3;
             const insertSql = 'INSERT INTO users (UUID, credits) VALUES (?, ?)';
             
             connectionPool.query(insertSql, [uuid, credits], (insertError, insertResults) => {
