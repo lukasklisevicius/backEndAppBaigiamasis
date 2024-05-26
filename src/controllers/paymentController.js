@@ -11,7 +11,7 @@ router.post('/payment-sheet', async (req, res) => {
     console.log('PO antro')
     const data = req.body
     const paymentIntent = await stripe.createPaymentIntent({
-        amount: data.cost,
+        amount: data.credits * 3 * 10,
         currency: 'eur',
         customer: customer.id,
         metadata: {
