@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router()
 const stripe = require('../stripe')
 const { STRIPE_PUBLISHABLE_KEY } = require('../config')
-const { connection } = require('../db')
+const { connectionPool: connectionPool } = require('../db')
 
 router.post('/payment-sheet', async (req, res) => {
     const customer = await stripe.createCustomer();
@@ -48,21 +48,34 @@ router.post('/webhook', express.raw({ type: 'application/json' }), (request, res
 
     // Handle the event
     switch (event.type) {
-
+        
         case 'payment_intent.succeeded':
             const paymentIntentSucceeded = event.data.object;
             const userId = paymentIntentSucceeded.metadata.uuid
             const credits = paymentIntentSucceeded.metadata.credits
+            connectionPool.getConnection(function(err, connection) {
+                const sql = 'UPDATE users SET credits = credits + ? WHERE UUID = ?';
+                connection.query(sql, [credits, userId], (error, results) => {
+                    console.log('results', results);
+                    if (error) {
+                        console.log('Error updating user credits:', error);
+                        response.status(500).json({ error: 'Server error' });
+                        return;
+                    }
+                    connection.commit(function (err) {
+                        if (err) {
+                            return connection.rollback(function () {
+                                console.error('Failed to commit changes')
+                                response.status(500).json({ error: 'Server error' });
+                                return
+                            });
+                        }
+                        return;
+                    });
+                })
 
-            const sql = 'UPDATE users SET credits = credits + ? WHERE UUID = ?';
-            connection.query(sql, [credits, userId], (error, results) => {
-                console.log('results', results);
-                if (error) {
-                    console.log('Error updating user credits:', error);
-                    res.status(500).json({ error: 'Server error' });
-                    return;
-                }
             })
+
             break;
         default:
             console.log(`Unhandled event type ${event.type}`);

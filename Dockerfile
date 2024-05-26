@@ -12,7 +12,7 @@ RUN npm install
 
 
 # Command to run the application
-CMD ["node", "server.js"]
+CMD ["node", "src/server.js"]
 
 
 # Expose the port that your app runs on

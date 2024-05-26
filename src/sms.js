@@ -1,3 +1,6 @@
+const twilio = require('twilio');
+const {TWILIO_ACCOUNT_SID,TWILIO_AUTH_TOKEN} = require('./config')
+const client = twilio(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
 function assignGifts(contacts) {
     const participants = Array.from({ length: contacts.length }, (_, index) => index);
     const shuffledParticipants = shuffle(participants);
@@ -39,11 +42,11 @@ async function sendMessage(msg, phoneNr) {
     console.log(`body: ${msg}, to: ${phoneNr}`);
 
     // Uncomment the following lines to actually send the message
-    // await client.messages.create({
-    //   body: msg,
-    //   from: SENDER_TEL_NR,
-    //   to: phoneNr
-    // });
+    await client.messages.create({
+      body: msg,
+      from: "Gifters SMS" || "+16305065489",
+      to: phoneNr
+    });
 }
 
 module.exports = {

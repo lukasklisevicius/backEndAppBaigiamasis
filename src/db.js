@@ -1,23 +1,26 @@
 const mysql = require('mysql');
 
-const { DB_HOST, DB_USER, DB_PASSWORD, DB_NAME } = require('./config');
+const { DB_HOST, DB_USER, DB_PASSWORD, DB_NAME, DB_SOCKET_PATH } = require('./config');
 
-const connection = mysql.createConnection({
-    host: DB_HOST,
+const connectionObject = {
     user: DB_USER,
     password: DB_PASSWORD,
-    database: DB_NAME
-});
+    database: DB_NAME,
+}
 
-// // Prisijunkite prie MySQL duomenų bazės
-connection.connect((err) => {
-  if (err) {
-    console.error('Klaida jungiantis prie MySQL:', err);
-    return;
-  }
-  console.log('Prisijungta prie MySQL duomenų bazės');
-});
+if (DB_HOST) {
+  connectionObject.host = DB_HOST;
+  connectionObject.port = 3306;
+}
+
+if (DB_SOCKET_PATH) {
+  connectionObject.socketPath = DB_SOCKET_PATH;
+}
+
+console.log(connectionObject)
+const connectionPool = mysql.createPool(connectionObject);
+
 
 module.exports = {
-    connection: connection
+    connectionPool: connectionPool
 }
